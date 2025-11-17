@@ -1,15 +1,104 @@
-<!DOCTYPE html>
-<html>
-
+<!doctype html>
+<html lang="vi">
 <head>
-    <h1>Hello Vinh </h1>
-    <p>Đây là trang web thử nghiệm </p>
-    <p>Tiếp tục thử nghiệm</p>
-    <h2>Thử nghiệm tiêu đề 2</h2>
-    <p>coxida</p>
-    <h3>
-        COXIDA TO HƠN
-    </h3>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Novel Reader - Giao diện cơ bản</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+<body>
 
+  <div id="sidebar">
+    <header>Chương</header>
+    <div id="chapters">Hãy mở file novel…</div>
+  </div>
+
+  <div id="content-area">
+    <div id="topbar">
+      <button id="openBtn">📂 Mở novel</button>
+      <button id="prevBtn">⬅ Trước</button>
+      <button id="nextBtn">➡ Tiếp</button>
+      <button id="incFont">A+</button>
+      <button id="decFont">A-</button>
+    </div>
+
+    <div id="reader">
+      <div id="chapter-title"></div>
+      <div id="chapter-content">Lorem ipsum dolor sit amet consectetur adipisicing elit. Consectetur a quo deleniti alias esse expedita laudantium ratione obcaecati similique facere soluta sunt, nobis consequatur, dolores tenetur mollitia nesciunt repellat quis?</div>
+    </div>
+  </div>
+
+  <input type="file" id="fileInput" accept="application/json" style="display:none" />
+
+  <script>
+    let novel = null;
+    let current = 0;
+    let fontSize = 18;
+
+    const chaptersList = document.getElementById("chapters");
+    const chapterTitle = document.getElementById("chapter-title");
+    const chapterContent = document.getElementById("chapter-content");
+
+    document.getElementById("openBtn").onclick = () =>
+      document.getElementById("fileInput").click();
+
+    document.getElementById("fileInput").onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        novel = JSON.parse(reader.result);
+        loadChapters();
+        loadChapter(0);
+      };
+      reader.readAsText(file);
+    };
+
+    function loadChapters() {
+      chaptersList.innerHTML = "";
+      novel.chapters.forEach((c, i) => {
+        const div = document.createElement("div");
+        div.className = "chapter-item";
+        div.textContent = c.title;
+        div.onclick = () => loadChapter(i);
+        chaptersList.appendChild(div);
+      });
+    }
+
+    function highlightChapter() {
+      [...document.querySelectorAll('.chapter-item')].forEach((el, i) => {
+        el.classList.toggle('active', i === current);
+      });
+    }
+
+    function loadChapter(i) {
+      current = i;
+      chapterTitle.textContent = novel.chapters[i].title;
+      chapterContent.textContent = novel.chapters[i].content;
+      highlightChapter();
+      document.getElementById('reader').scrollTop = 0;
+    }
+
+    document.getElementById("prevBtn").onclick = () => {
+      if (!novel || current === 0) return;
+      loadChapter(current - 1);
+    };
+
+    document.getElementById("nextBtn").onclick = () => {
+      if (!novel || current >= novel.chapters.length - 1) return;
+      loadChapter(current + 1);
+    };
+
+    document.getElementById("incFont").onclick = () => {
+      fontSize += 2;
+      document.documentElement.style.setProperty("--font-size", fontSize + "px");
+    };
+
+    document.getElementById("decFont").onclick = () => {
+      fontSize = Math.max(12, fontSize - 2);
+      document.documentElement.style.setProperty("--font-size", fontSize + "px");
+    };
+  </script>
+
+</body>
 </html>
